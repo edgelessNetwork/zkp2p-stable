@@ -3,7 +3,7 @@
 ## Getting Started
 
 ```sh
-npm i
+npm i --force
 forge test
 ```
 ## Overview
