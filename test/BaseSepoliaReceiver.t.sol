@@ -28,7 +28,8 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
         });
         vm.prank(owner);
         USDC = new FiatTokenV2();
-        baseReceiver = new BaseReceiver(stableReceiver, USDC);
+        baseReceiver = new BaseReceiver();
+        baseReceiver.initialize(owner, stableReceiver, USDC);
     }
 
     function test_Forwarding(uint256 amount) external {

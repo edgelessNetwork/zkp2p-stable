@@ -9,6 +9,7 @@ contract EdgelessMinter is Initializable, Ownable2StepUpgradeable {
     IERC20 public usdlr;
     address public stableMinter;
 
+    event SetStableMinter(address indexed stableMinter);
     event Mint(address indexed stableMinter, address indexed to, uint256 amount);
 
     error OnlyStableMinter();
@@ -50,5 +51,6 @@ contract EdgelessMinter is Initializable, Ownable2StepUpgradeable {
      */
     function setStableMinter(address _stableMinter) external onlyOwner {
         stableMinter = _stableMinter;
+        emit SetStableMinter(_stableMinter);
     }
 }

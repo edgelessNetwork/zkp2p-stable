@@ -3,7 +3,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
-  const { deploy, get } = deployments;
+  const { deploy, execute, get } = deployments;
   const { deployer, stableReceiver } = await getNamedAccounts();
   await deploy("USDC", {
     contract: "FiatTokenV2",
@@ -17,8 +17,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
-    args: [stableReceiver, (await get("USDC")).address],
   });
+
+  await execute(
+    "BaseReceiver",
+    {
+      from: deployer,
+      log: true,
+    },
+    "initialize",
+    deployer,
+    stableReceiver,
+    (await get("USDC")).address,
+  );
 
   await hre.run("verify:verify", {
     address: (await get("USDC")).address,
@@ -27,7 +38,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await hre.run("verify:verify", {
     address: (await get("BaseReceiver")).address,
-    constructorArguments: [stableReceiver, (await get("USDC")).address],
+    constructorArguments:[],
   });
 };
 export default func;

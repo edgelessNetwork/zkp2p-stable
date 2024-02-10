@@ -31,7 +31,8 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
             blockNumber: FORK_BLOCK_NUMBER
         });
         vm.prank(owner);
-        baseReceiver = new BaseReceiver(stableReceiver, USDC);
+        baseReceiver = new BaseReceiver();
+        baseReceiver.initialize(owner, stableReceiver, USDC);
     }
 
     function test_Forwarding(uint256 amount) external {

@@ -45,13 +45,13 @@ const config: HardhatUserConfig = {
       edgelessSepoliaTestnet: "0x08C6fBA53BF2Ae19DBdC330E258B510c1C148e44",
     },
     stableReceiver: {
-      baseSepolia: "0x08C6fBA53BF2Ae19DBdC330E258B510c1C148e44",
+      baseSepolia: "0x6FAc84fB0cdF5BCC40300dBd3b47d3d918eEEE04",
     },
     stableMinter: {
-      edgelessSepoliaTestnet: "0x08C6fBA53BF2Ae19DBdC330E258B510c1C148e44",
+      edgelessSepoliaTestnet: "0xAF6905711dA0Aec3513290DE42BA45143392a362",
     },
     USDLR: {
-      edgelessSepoliaTestnet: "0x08C6fBA53BF2Ae19DBdC330E258B510c1C148e44",
+      edgelessSepoliaTestnet: "0x1aFeB1d0c8EfA4D6b58b937949ffB55366b8D616",
     },
   },
   paths: {

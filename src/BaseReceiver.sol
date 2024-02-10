@@ -2,19 +2,20 @@
 pragma solidity >=0.8.23;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract BaseReceiver {
+contract BaseReceiver is Initializable, Ownable2StepUpgradeable {
     address public stableReceiver;
     IERC20 public usdc;
 
+    event SetStableReceiver(address indexed stableReceiver);
     event Forward(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
 
-    /**
-     * @notice The owner of WrappedToken is the EdgelessDeposit contract
-     */
-    constructor(address _stableReceiver, IERC20 _usdc) {
+    function initialize(address _owner, address _stableReceiver, IERC20 _usdc) external initializer {
         stableReceiver = _stableReceiver;
         usdc = _usdc;
+        __Ownable_init(_owner);
     }
 
     /**
@@ -28,5 +29,10 @@ contract BaseReceiver {
         usdc.transferFrom(sender, address(this), amount);
         usdc.transfer(stableReceiver, amount);
         emit Forward(sender, stableReceiver, to, amount);
+    }
+
+    function setStableReceiver(address _stableReceiver) external onlyOwner {
+        stableReceiver = _stableReceiver;
+        emit SetStableReceiver(_stableReceiver);
     }
 }
