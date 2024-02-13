@@ -10,7 +10,7 @@ import { StdUtils } from "forge-std/src/StdUtils.sol";
 import { BaseReceiver } from "../src/BaseReceiver.sol";
 
 contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
-    event Forward(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
+    event ForwardFrom(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
 
     uint32 public constant FORK_BLOCK_NUMBER = 10_378_806; // 2/9/2024
 
@@ -42,11 +42,24 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
         vm.startPrank(zkp2p4337Wallet);
         USDC.approve(address(baseReceiver), amount);
         vm.expectEmit(address(baseReceiver));
-        emit Forward(zkp2p4337Wallet, stableReceiver, edgelessUserWallet, amount);
-        baseReceiver.forward(zkp2p4337Wallet, amount, edgelessUserWallet);
+        emit ForwardFrom(zkp2p4337Wallet, stableReceiver, edgelessUserWallet, amount);
+        baseReceiver.forwardFrom(zkp2p4337Wallet, amount, edgelessUserWallet);
         assertEq(USDC.balanceOf(address(baseReceiver)), 0, "BaseReceiver should have 0 USDC after forwarding");
         assertEq(
             USDC.balanceOf(stableReceiver), amount, "Edgeless User Wallet should have `amount` of USDC after forwarding"
         );
+    }
+
+    function test_SetStableReceiver() external {
+        vm.startPrank(owner);
+        address newStableReceiver = makeAddr("New Stable Receiver");
+        baseReceiver.setStableReceiver(newStableReceiver);
+        assertEq(baseReceiver.stableReceiver(), newStableReceiver, "Stable receiver should be newStableReceiver");
+    }
+
+    function test_UnauthorizedSetStableReceiver() external {
+        address newStableReceiver = makeAddr("New Stable Receiver");
+        vm.expectRevert();
+        baseReceiver.setStableReceiver(newStableReceiver);
     }
 }
