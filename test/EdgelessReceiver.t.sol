@@ -11,7 +11,7 @@ import { EdgelessReceiver } from "../src/EdgelessReceiver.sol";
 import { FiatTokenV2 } from "../src/FiatTokenV2.sol";
 
 contract EdgelessMinterTest is PRBTest, StdCheats, StdUtils {
-    event Forward(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
+    event ForwardFrom(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
 
     address public owner = makeAddr("Edgeless non-US KYCed entity");
     address public stableMinter = makeAddr("Stable Minter");
@@ -36,8 +36,8 @@ contract EdgelessMinterTest is PRBTest, StdCheats, StdUtils {
         vm.startPrank(edgelessUserWallet);
         USDLR.approve(address(edgelessReceiver), amount);
         vm.expectEmit(address(edgelessReceiver));
-        emit Forward(edgelessUserWallet, stableReceiver, edgelessUserWallet, amount);
-        edgelessReceiver.forward(edgelessUserWallet, amount, edgelessUserWallet);
+        emit ForwardFrom(edgelessUserWallet, stableReceiver, edgelessUserWallet, amount);
+        edgelessReceiver.forwardFrom(edgelessUserWallet, amount, edgelessUserWallet);
         assertEq(USDLR.balanceOf(address(edgelessReceiver)), 0, "EdgelessReceiver should have 0 USDLR after forwarding");
         assertEq(
             USDLR.balanceOf(address(stableReceiver)),

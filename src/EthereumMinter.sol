@@ -10,7 +10,7 @@ contract EthereumMinter is Initializable, Ownable2StepUpgradeable {
     address public stableMinter;
 
     event SetStableMinter(address indexed stableMinter);
-    event Mint(address indexed stableMinter, address indexed to, uint256 amount);
+    event Forward(address indexed stableMinter, address indexed to, uint256 amount);
 
     error OnlyStableMinter();
 
@@ -39,10 +39,10 @@ contract EthereumMinter is Initializable, Ownable2StepUpgradeable {
      * @param to The address to send the USDLR to
      * @param amount The amount of USDLR to mint
      */
-    function mint(address to, uint256 amount) external onlyStableMinter {
+    function forward(address to, uint256 amount) external onlyStableMinter {
         usdc.transferFrom(stableMinter, address(this), amount);
         usdc.transfer(to, amount);
-        emit Mint(stableMinter, to, amount);
+        emit Forward(stableMinter, to, amount);
     }
 
     /**

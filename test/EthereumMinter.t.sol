@@ -41,7 +41,7 @@ contract EthereumMinterTest is PRBTest, StdCheats, StdUtils {
         USDC.transfer(address(stableMinter), amount);
         vm.startPrank(stableMinter);
         USDC.approve(address(ethereumMinter), amount);
-        ethereumMinter.mint(edgelessUserWallet, amount);
+        ethereumMinter.forward(edgelessUserWallet, amount);
         assertEq(USDC.balanceOf(edgelessUserWallet), amount, "USDC balance of edgelessUserWallet should be amount");
         assertEq(USDC.balanceOf(stableMinter), 0, "USDC balance of stableMinter should be 0");
     }
@@ -56,7 +56,7 @@ contract EthereumMinterTest is PRBTest, StdCheats, StdUtils {
         address unauthorized = makeAddr("Unauthorized");
         vm.startPrank(unauthorized);
         vm.expectRevert();
-        ethereumMinter.mint(edgelessUserWallet, amount);
+        ethereumMinter.forward(edgelessUserWallet, amount);
     }
 
     function test_SetStableMinter() external {

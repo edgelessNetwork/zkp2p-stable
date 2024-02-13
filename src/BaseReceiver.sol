@@ -10,7 +10,7 @@ contract BaseReceiver is Initializable, Ownable2StepUpgradeable {
     IERC20 public usdc;
 
     event SetStableReceiver(address indexed stableReceiver);
-    event Forward(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
+    event ForwardFrom(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
 
     function initialize(address _owner, address _stableReceiver, IERC20 _usdc) external initializer {
         stableReceiver = _stableReceiver;
@@ -25,10 +25,10 @@ contract BaseReceiver is Initializable, Ownable2StepUpgradeable {
      * @param amount The amount of USDC to forward
      * @param to The address to send the USDC to
      */
-    function forward(address sender, uint256 amount, address to) external {
+    function forwardFrom(address sender, uint256 amount, address to) external {
         usdc.transferFrom(sender, address(this), amount);
         usdc.transfer(stableReceiver, amount);
-        emit Forward(sender, stableReceiver, to, amount);
+        emit ForwardFrom(sender, stableReceiver, to, amount);
     }
 
     function setStableReceiver(address _stableReceiver) external onlyOwner {
