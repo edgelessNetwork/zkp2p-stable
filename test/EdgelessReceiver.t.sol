@@ -44,4 +44,17 @@ contract EdgelessMinterTest is PRBTest, StdCheats, StdUtils {
             "StableReceiver should have `amount` of USDLR after forwarding"
         );
     }
+
+    function test_SetStableReceiver() external {
+        vm.startPrank(owner);
+        address newStableReceiver = makeAddr("New Stable Receiver");
+        edgelessReceiver.setStableReceiver(newStableReceiver);
+        assertEq(edgelessReceiver.stableReceiver(), newStableReceiver, "Stable receiver should be newStableReceiver");
+    }
+
+    function test_UnauthorizedSetStableReceiver() external {
+        address newStableReceiver = makeAddr("New Stable Receiver");
+        vm.expectRevert();
+        edgelessReceiver.setStableReceiver(newStableReceiver);
+    }
 }

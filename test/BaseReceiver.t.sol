@@ -49,4 +49,17 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
             USDC.balanceOf(stableReceiver), amount, "Edgeless User Wallet should have `amount` of USDC after forwarding"
         );
     }
+
+    function test_SetStableReceiver() external {
+        vm.startPrank(owner);
+        address newStableReceiver = makeAddr("New Stable Receiver");
+        baseReceiver.setStableReceiver(newStableReceiver);
+        assertEq(baseReceiver.stableReceiver(), newStableReceiver, "Stable receiver should be newStableReceiver");
+    }
+
+    function test_UnauthorizedSetStableReceiver() external {
+        address newStableReceiver = makeAddr("New Stable Receiver");
+        vm.expectRevert();
+        baseReceiver.setStableReceiver(newStableReceiver);
+    }
 }
