@@ -4,7 +4,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy, execute, get } = deployments;
-  const { deployer, stableMinter } = await getNamedAccounts();
+  const { deployer, stableMinter, USDC } = await getNamedAccounts();
 
   await deploy("EthereumMinter", {
     contract: "EthereumMinter",
@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     { from: deployer },
     "initialize",
     deployer,
-    (await get("USDC")).address,
+    USDC,
     stableMinter,
   );
 
