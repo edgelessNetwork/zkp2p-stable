@@ -5,6 +5,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy, execute, get } = deployments;
   const { deployer, stableMinter, USDLR } = await getNamedAccounts();
+  const minAmount = "1000000000"; //1,000 USDLR assuming 6 decimals
 
   await deploy("EdgelessReceiver", {
     contract: "EdgelessReceiver",
@@ -13,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
-  await execute("EdgelessReceiver", { from: deployer }, "initialize", deployer, stableMinter, USDLR);
+  await execute("EdgelessReceiver", { from: deployer }, "initialize", deployer, stableMinter, USDLR, minAmount);
 
   await hre.run("verify:verify", {
     address: (await get("EdgelessReceiver")).address,
