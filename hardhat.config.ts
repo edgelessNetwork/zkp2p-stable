@@ -49,6 +49,7 @@ const config: HardhatUserConfig = {
     },
     stableMinter: {
       edgelessSepoliaTestnet: "0xAF6905711dA0Aec3513290DE42BA45143392a362",
+      baseSepolia: "0xAF6905711dA0Aec3513290DE42BA45143392a362",
     },
     USDLR: {
       edgelessSepoliaTestnet: "0x1aFeB1d0c8EfA4D6b58b937949ffB55366b8D616",
