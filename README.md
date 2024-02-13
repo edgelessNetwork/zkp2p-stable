@@ -10,7 +10,8 @@ forge test
 
 ### Background
 
-We need to be able to mint USDLR on Edgeless with USDC on any chain. The user flow is as follows:
+#### User Deposit Flow
+We need to be able to mint USDLR on Edgeless with USDC on any chain. The user deposit flow is as follows:
 
 On Base
 1. User onboards USDC via ZKP2P
@@ -24,12 +25,26 @@ On Base
 On Edgeless
 1. Stable's minter wallet mints amount to itself
 2. Stable's minter wallet approves EdgelessMinter to spend amount
-3. Stable's minter wallet calls EdgelessMinter.mint(amount, metadata) where metadata is from the Forward event
+3. Stable's minter wallet calls EdgelessMinter.mint(to, amount) where metadata is from the Forward event
 4. EdgelessMinter transfers USDLR from Stable's minter wallet to EdgelessMinter
 5. EdgelessMinter sends USDLR from itself to the address
 
-# Contract Design
+#### User Withdrawal Flow
 
+On Edgeless:
+1. User approves usdlr to EdgelessReceiver
+2. User calls EdgelessReceiver.forward()
+3. EdgelessReceiver receives USDLR, then sends it to Stable.
+4. EdgelessReceiver emits Forward(...) event
+5. Off-chain, Stable listens for Forward and records the address and amount
+
+On Ethereum:
+1. Stable's USDC custodian wallet approves EthereumMinter to spend amount
+2. Stable's USDC custodian wallet calls EthereumMinter.mint(to, amount) where to and amount are from the Forward event.
+3. EthereumMinter transfers USDC from Stable's USDC custodian wallet to EthereumMinter
+4. EthereumMinter sends USDC from itself to `to`
+
+# Contract Design
 
 ## Invariants
 

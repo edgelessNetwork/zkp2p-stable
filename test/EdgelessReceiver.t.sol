@@ -20,17 +20,18 @@ contract EdgelessMinterTest is PRBTest, StdCheats, StdUtils {
 
     EdgelessReceiver public edgelessReceiver;
     FiatTokenV2 public USDLR;
+    uint256 public minAmount = 1000e18;
 
     function setUp() public virtual {
         vm.createSelectFork({ urlOrAlias: "https://edgeless-testnet.rpc.caldera.xyz/http" });
         edgelessReceiver = new EdgelessReceiver();
         USDLR = new FiatTokenV2();
         vm.prank(owner);
-        edgelessReceiver.initialize(owner, stableReceiver, USDLR);
+        edgelessReceiver.initialize(owner, stableReceiver, USDLR, minAmount);
     }
 
     function test_Forwarding(uint256 amount) external {
-        amount = bound(amount, 0, 1e40);
+        amount = bound(amount, minAmount, 1e40);
         USDLR.mint(edgelessUserWallet, amount);
         vm.startPrank(edgelessUserWallet);
         USDLR.approve(address(edgelessReceiver), amount);
@@ -56,5 +57,18 @@ contract EdgelessMinterTest is PRBTest, StdCheats, StdUtils {
         address newStableReceiver = makeAddr("New Stable Receiver");
         vm.expectRevert();
         edgelessReceiver.setStableReceiver(newStableReceiver);
+    }
+
+    function test_SetMinAmount() external {
+        vm.startPrank(owner);
+        uint256 newMinAmount = 1000e18;
+        edgelessReceiver.setMinAmount(newMinAmount);
+        assertEq(edgelessReceiver.minAmount(), newMinAmount, "Min amount should be newMinAmount");
+    }
+
+    function test_UnauthorizedSetMinAmount() external {
+        uint256 newMinAmount = 1000e18;
+        vm.expectRevert();
+        edgelessReceiver.setMinAmount(newMinAmount);
     }
 }
