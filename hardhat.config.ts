@@ -63,7 +63,8 @@ const config: HardhatUserConfig = {
       edgelessSepoliaTestnet: "0x1aFeB1d0c8EfA4D6b58b937949ffB55366b8D616",
     },
     USDC: {
-      sepolia: "0x51fCe89b9f6D4c530698f181167043e1bB4abf89",
+      baseSepolia: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      sepolia: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
     },
   },
   paths: {
