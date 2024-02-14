@@ -5,7 +5,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy, execute, get } = deployments;
   const { deployer, stableMinter, USDLR } = await getNamedAccounts();
-  const minAmount = "1000000000"; //1,000 USDLR assuming 6 decimals
+  const minAmount = "2000000"; //1,000 USDLR assuming 6 decimals
 
   await deploy("EdgelessReceiver", {
     contract: "EdgelessReceiver",
