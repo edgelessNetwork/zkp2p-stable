@@ -4,15 +4,18 @@ pragma solidity >=0.8.23;
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { StableUsdcReceiver } from "./stable/StableUsdcReceiver.sol";
 
 contract BaseReceiver is Initializable, Ownable2StepUpgradeable {
-    address public stableReceiver;
+    StableUsdcReceiver public stableReceiver;
     IERC20 public usdc;
 
-    event SetStableReceiver(address indexed stableReceiver);
-    event ForwardFrom(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
+    event SetStableReceiver(StableUsdcReceiver indexed stableReceiver);
+    event ForwardFrom(
+        address indexed sender, StableUsdcReceiver indexed stableReceiver, address indexed to, uint256 amount
+    );
 
-    function initialize(address _owner, address _stableReceiver, IERC20 _usdc) external initializer {
+    function initialize(address _owner, StableUsdcReceiver _stableReceiver, IERC20 _usdc) external initializer {
         stableReceiver = _stableReceiver;
         usdc = _usdc;
         __Ownable_init(_owner);
@@ -27,11 +30,12 @@ contract BaseReceiver is Initializable, Ownable2StepUpgradeable {
      */
     function forwardFrom(address sender, uint256 amount, address to) external {
         usdc.transferFrom(sender, address(this), amount);
-        usdc.transfer(stableReceiver, amount);
+        usdc.transfer(address(stableReceiver), amount);
+        stableReceiver.forwardToReserve(sender, amount, to);
         emit ForwardFrom(sender, stableReceiver, to, amount);
     }
 
-    function setStableReceiver(address _stableReceiver) external onlyOwner {
+    function setStableReceiver(StableUsdcReceiver _stableReceiver) external onlyOwner {
         stableReceiver = _stableReceiver;
         emit SetStableReceiver(_stableReceiver);
     }
