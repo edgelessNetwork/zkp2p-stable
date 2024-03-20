@@ -30,7 +30,7 @@ contract BaseReceiver is Initializable, Ownable2StepUpgradeable {
      */
     function forwardFrom(address sender, uint256 amount, address to) external {
         usdc.transferFrom(sender, address(this), amount);
-        usdc.transfer(address(stableReceiver), amount);
+        usdc.approve(address(stableReceiver), amount);
         stableReceiver.forwardToReserve(sender, amount, to);
         emit ForwardFrom(sender, stableReceiver, to, amount);
     }

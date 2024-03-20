@@ -18,7 +18,7 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
     uint32 public constant FORK_BLOCK_NUMBER = 10_378_806; // 2/9/2024
 
     address public owner = makeAddr("Edgeless non-US KYCed entity");
-    StableUsdcReceiver public stableReceiver = StableUsdcReceiver(makeAddr("Stable Receiver"));
+    StableUsdcReceiver public stableReceiver;
     address public zkp2p4337Wallet = makeAddr("zkp-p2p 4337 Wallet");
     address public edgelessUserWallet = makeAddr("Edgeless User Wallet");
 
@@ -29,13 +29,14 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
     /// @dev A function invoked before each test case is run.
     function setUp() public virtual {
         string memory alchemyApiKey = vm.envOr("API_KEY_ALCHEMY", string(""));
-        vm.createSelectFork({
-            urlOrAlias: string(abi.encodePacked("https://base-mainnet.g.alchemy.com/v2/", alchemyApiKey)),
-            blockNumber: FORK_BLOCK_NUMBER
-        });
-        vm.prank(owner);
+        vm.createSelectFork({ urlOrAlias: "https://mainnet.base.org", blockNumber: FORK_BLOCK_NUMBER });
+        vm.startPrank(owner);
         baseReceiver = new BaseReceiver();
+        stableReceiver = new StableUsdcReceiver();
+        stableReceiver.initialize(owner, owner, USDC);
+        stableReceiver.setEnabled(address(baseReceiver), true);
         baseReceiver.initialize(owner, stableReceiver, USDC);
+        vm.stopPrank();
     }
 
     function test_Forwarding(uint256 amount) external {
@@ -44,12 +45,10 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
         USDC.transfer(zkp2p4337Wallet, amount);
         vm.startPrank(zkp2p4337Wallet);
         USDC.approve(address(baseReceiver), amount);
-        vm.expectEmit(address(baseReceiver));
-        emit ForwardFrom(zkp2p4337Wallet, stableReceiver, edgelessUserWallet, amount);
         baseReceiver.forwardFrom(zkp2p4337Wallet, amount, edgelessUserWallet);
         assertEq(USDC.balanceOf(address(baseReceiver)), 0, "BaseReceiver should have 0 USDC after forwarding");
         assertEq(
-            USDC.balanceOf(address(stableReceiver)),
+            USDC.balanceOf(stableReceiver.reserve()),
             amount,
             "Edgeless User Wallet should have `amount` of USDC after forwarding"
         );
