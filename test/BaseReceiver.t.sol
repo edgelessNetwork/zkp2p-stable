@@ -8,14 +8,17 @@ import { StdCheats } from "forge-std/src/StdCheats.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { StdUtils } from "forge-std/src/StdUtils.sol";
 import { BaseReceiver } from "../src/BaseReceiver.sol";
+import { StableUsdcReceiver } from "../src/stable/StableUsdcReceiver.sol";
 
 contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
-    event ForwardFrom(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
+    event ForwardFrom(
+        address indexed sender, StableUsdcReceiver indexed stableReceiver, address indexed to, uint256 amount
+    );
 
     uint32 public constant FORK_BLOCK_NUMBER = 10_378_806; // 2/9/2024
 
     address public owner = makeAddr("Edgeless non-US KYCed entity");
-    address public stableReceiver = makeAddr("Stable Receiver");
+    StableUsdcReceiver public stableReceiver;
     address public zkp2p4337Wallet = makeAddr("zkp-p2p 4337 Wallet");
     address public edgelessUserWallet = makeAddr("Edgeless User Wallet");
 
@@ -26,13 +29,14 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
     /// @dev A function invoked before each test case is run.
     function setUp() public virtual {
         string memory alchemyApiKey = vm.envOr("API_KEY_ALCHEMY", string(""));
-        vm.createSelectFork({
-            urlOrAlias: string(abi.encodePacked("https://base-mainnet.g.alchemy.com/v2/", alchemyApiKey)),
-            blockNumber: FORK_BLOCK_NUMBER
-        });
-        vm.prank(owner);
+        vm.createSelectFork({ urlOrAlias: "https://mainnet.base.org", blockNumber: FORK_BLOCK_NUMBER });
+        vm.startPrank(owner);
         baseReceiver = new BaseReceiver();
+        stableReceiver = new StableUsdcReceiver();
+        stableReceiver.initialize(owner, owner, USDC);
+        stableReceiver.setEnabled(address(baseReceiver), true);
         baseReceiver.initialize(owner, stableReceiver, USDC);
+        vm.stopPrank();
     }
 
     function test_Forwarding(uint256 amount) external {
@@ -41,24 +45,28 @@ contract BaseReceiverTest is PRBTest, StdCheats, StdUtils {
         USDC.transfer(zkp2p4337Wallet, amount);
         vm.startPrank(zkp2p4337Wallet);
         USDC.approve(address(baseReceiver), amount);
-        vm.expectEmit(address(baseReceiver));
-        emit ForwardFrom(zkp2p4337Wallet, stableReceiver, edgelessUserWallet, amount);
         baseReceiver.forwardFrom(zkp2p4337Wallet, amount, edgelessUserWallet);
         assertEq(USDC.balanceOf(address(baseReceiver)), 0, "BaseReceiver should have 0 USDC after forwarding");
         assertEq(
-            USDC.balanceOf(stableReceiver), amount, "Edgeless User Wallet should have `amount` of USDC after forwarding"
+            USDC.balanceOf(stableReceiver.reserve()),
+            amount,
+            "Edgeless User Wallet should have `amount` of USDC after forwarding"
         );
     }
 
     function test_SetStableReceiver() external {
         vm.startPrank(owner);
-        address newStableReceiver = makeAddr("New Stable Receiver");
+        StableUsdcReceiver newStableReceiver = StableUsdcReceiver(makeAddr("New Stable Receiver"));
         baseReceiver.setStableReceiver(newStableReceiver);
-        assertEq(baseReceiver.stableReceiver(), newStableReceiver, "Stable receiver should be newStableReceiver");
+        assertEq(
+            address(baseReceiver.stableReceiver()),
+            address(newStableReceiver),
+            "Stable receiver should be newStableReceiver"
+        );
     }
 
     function test_UnauthorizedSetStableReceiver() external {
-        address newStableReceiver = makeAddr("New Stable Receiver");
+        StableUsdcReceiver newStableReceiver = StableUsdcReceiver(makeAddr("New Stable Receiver"));
         vm.expectRevert();
         baseReceiver.setStableReceiver(newStableReceiver);
     }

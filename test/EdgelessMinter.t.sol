@@ -11,7 +11,6 @@ import { EdgelessMinter } from "../src/EdgelessMinter.sol";
 import { FiatTokenV2 } from "../src/FiatTokenV2.sol";
 
 contract EdgelessMinterTest is PRBTest, StdCheats, StdUtils {
-    event Forward(address indexed sender, address indexed stableReceiver, address indexed to, uint256 amount);
 
     address public owner = makeAddr("Edgeless non-US KYCed entity");
     address public stableMinter = makeAddr("Stable Minter");

@@ -25,10 +25,7 @@ contract EthereumMinterTest is PRBTest, StdCheats, StdUtils {
 
     function setUp() public virtual {
         string memory alchemyApiKey = vm.envOr("API_KEY_ALCHEMY", string(""));
-        vm.createSelectFork({
-            urlOrAlias: string(abi.encodePacked("https://eth-mainnet.g.alchemy.com/v2/", alchemyApiKey)),
-            blockNumber: FORK_BLOCK_NUMBER
-        });
+        vm.createSelectFork({ urlOrAlias: "https://eth.llamarpc.com", blockNumber: FORK_BLOCK_NUMBER });
         vm.startPrank(stableMinter);
         ethereumMinter = new EthereumMinter();
         ethereumMinter.initialize(owner, IERC20(USDC), stableMinter);
